@@ -65,6 +65,14 @@ The above code will open `<project-drawer-one>`.
         display: block;
       }
       
+      app-box {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+
      .main-header ::content > [main-header][fixed] {
         position: fixed;
         top: 0;
@@ -132,6 +140,9 @@ The above code will open `<project-drawer-one>`.
         // use case is when layout or parent of this element is hidden
         // this.$$('app-box').resetLayout();
         this.scrollProgress = this.$$('app-box').getScrollState().progress;
+        if (this.$$('app-box').getBoundingClientRect().bottom <= window.scrollY) {
+          this.scrollProgress = 1;
+        }
         return this.scrollProgress;
       },
 

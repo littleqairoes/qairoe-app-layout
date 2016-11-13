@@ -72,6 +72,8 @@ See [ROADMAP](/ROADMAP.md)
 
 ## History
 
+- v0.0.4: Rehashed so that it deletes the uploaded bower_components and fixed bug for scrollProgress to work
+
 - v0.0.3: Updated Documentation
 
 - v0.0.2: Made a minor fix to main-header according to [Polymer Styling guide for Children](https://www.polymer-project.org/1.0/docs/devguide/styling#styling-distributed-children-content)
