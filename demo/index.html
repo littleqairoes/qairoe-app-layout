@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+  <head>
+    <title>qairoe-app-layout demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    
+    <link rel="import" href="../../app-layout/app-header/app-header.html">
+    <link rel="import" href="../../app-layout/app-drawer/app-drawer.html">
+    <link rel="import" href="../../app-layout/app-toolbar/app-toolbar.html">
+
+    <link rel="import" href="../qairoe-app-layout.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+      body {
+        padding: 0;
+      }
+    
+      app-header app-toolbar {
+        background-color: blue;
+      }
+      
+      div[main-content] {
+        height: 200vh;
+        background-color: yellow;
+        padding-top: 134px;
+      }
+      
+      app-toolbar[sticky] {
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <template is="dom-bind" id="core-app">
+      <qairoe-app-layout>
+        <app-header main-header condenses fixed>
+          <app-toolbar sticky>
+            <span main-title>Title</span>
+            <button on-tap="toggleDrawer" >Toggle Drawer</button>
+          </app-toolbar>
+          <app-toolbar>
+            <span main-title>View 1</span>
+          </app-toolbar>
+        </app-header>
+        
+        <app-drawer main-drawer>
+          Drawer
+        </app-drawer>
+        
+        <div main-content>
+          This is the main content
+        </div>
+      </qairoe-app-layout>
+    </template>
+    
+    <script>
+      (function(scope) {
+        scope.toggleDrawer = function(e) {
+          // Create the event.
+          var event = document.createEvent('Event');
+          // Define that the event name is 'build'.
+          event.initEvent('toggle-drawer', true, true);
+          e.target.dispatchEvent(event);
+          // document.querySelector('app-drawer').toggle();
+        };
+      })(document.querySelector('#core-app'));
+    </script>
+
+   
+
+  </body>

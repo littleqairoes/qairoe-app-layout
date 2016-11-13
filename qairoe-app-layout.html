@@ -1,0 +1,180 @@
+<!-- Polymer Global dependencies -->
+<link rel="import" href="../polymer/polymer.html">
+
+<!-- Polymer Element dependencies -->
+<link rel="import" href="../app-layout/app-box/app-box.html">
+<link rel="import" href="../app-layout/app-scroll-effects/effects/parallax-background.html">
+
+<!--
+`<qairoe-app-layout>` allows the automatic laying out of header, drawers, and content.
+It notifies other components of the scroll progress of the viewport (not the scroll position).
+
+It is usually used in your entry shell like my-app or core-app.
+
+```html
+<qairoe-app-layout>
+  <project-header main-header></project-header>
+  <project-drawer main-drawer></project-drawer>
+  <project-content main-content></project-content>
+</qairoe-app-layout>
+```
+
+### Setting Elements to be Content, Header, or Drawer
+
+To do that, you just have to set attributes `main-content`, `main-header`, and
+`main-drawer` to elements that is the main-content, header, and drawer, respectively
+(See above example).
+
+### Opening the Drawers
+
+It listens for an event `toggle-drawer` to open any custom element with
+an attribute `main-drawer` in it if and only if the custom element with an
+attribute `main-drawer` has a function `toggle` (like `app-drawer`) or `toggleDrawer`.
+
+### Having Several different Drawers
+
+You can have several different drawers and can differentiate them by adding a value
+in the `main-drawer` attribute
+
+```html
+<qairoe-app-layout>
+  <project-header main-header></project-header>
+  <project-drawer-one main-drawer="drawer-one"></project-drawer-one>
+  <project-drawer-one main-drawer="drawer-two"></project-drawer-one>
+  <project-content main-content></project-content>
+</qairoe-app-layout>
+```
+
+This way, you can add the `drawer-id` in the data payload of the event by calling
+this:
+
+```js
+this.fire('toggle-drawer', 'drawer-one');
+```
+
+The above code will open `<project-drawer-one>`.
+
+@demo demo/index.html  Simple app demo
+
+-->
+
+<dom-module id="qairoe-app-layout">
+  <template>
+    <style is="custom-style">
+      :host {
+        display: block;
+      }
+      
+     .main-header ::content > [main-header][fixed] {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+    </style>
+
+    <!-- Scroll Computation -->
+    <app-box
+      effects="parallax-background"
+      effects-config='{"parallax-background": {"scalar": -0.5}}'></app-box>
+
+    <!-- Content ordering-->
+    <div class="main-header">
+      <content id="main-header" select="[main-header]"></content>  
+    </div>
+    
+    <content id="main-content" select="[main-content]"></content>
+    
+    <content id="main-drawer" select="[main-drawer]"></content>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'qairoe-app-layout',
+
+      listeners: {
+        'toggle-drawer': '_toggleDrawer'
+      },
+
+      properties: {
+        /**
+         * Notifies the scroll progress of the viewport from 0 to 1. Useful for
+         * manipulating header transparencies depending on viewport scroll.
+         */
+        scrollProgress: {
+          type: Number,
+          value: 0,
+          notify: true
+        },
+      },
+
+      /**
+       * Lifecycle methods
+       */
+      attached: function() {
+        this.scrollHeaderEffect();
+        window.addEventListener('scroll', this.scrollHeaderEffect.bind(this));
+      },
+
+      detached: function() {
+        window.removeEventListener('scroll', this.scrollHeaderEffect.bind(this));
+      },
+
+      /**
+       * Gets the scroll progress from the `app-box` element and sets the
+       * `scrollProgress` property.
+       *
+       * @return {number} the scroll progress of the viewport
+       */
+      scrollHeaderEffect: function() {
+        // this is a hack. Don't know yet the impact to performance
+        // will turn off for now
+        // use case is when layout or parent of this element is hidden
+        // this.$$('app-box').resetLayout();
+        this.scrollProgress = this.$$('app-box').getScrollState().progress;
+        return this.scrollProgress;
+      },
+
+      /**
+       * Calls and passes the drawer id (if it exists) to the private method `_toggleDrawer`
+       * to open/close the element with a `main-drawer` attribute that has the id.
+       *
+       * @param {string} id of the drawer (optional)
+       */
+
+      toggleDrawer: function(id) {
+        this._toggleDrawer({detail: id});
+      },
+
+      /**
+       * Toggles the drawer method of the first child element with an attribute of
+       * main-drawer that has a method toggleDrawer and that is not hidden by default.
+       * It is called by listening an event `toggle-drawer` or by calling the
+       * `toggleDrawer` public method.
+       *
+       * It also checks if there is drawer id given by checking the event data payload
+       * for the string drawer id. If there exists a string id, it then checks if
+       * the id exists as an attribute of the element or it is the value of the attribute
+       * `main-drawer` and toggles the drawer method from there.
+       *
+       * @param {{detail: string}}
+       */
+      _toggleDrawer: function(e) {
+        var id = e && e.detail ? e.detail : null;
+        var nodes = this.queryAllEffectiveChildren('[main-drawer]');
+        for (var i in nodes) {
+          var el = nodes[i];
+          if (el && (el.toggleDrawer || el.toggle)) {
+            if (id && (
+                el.hasAttribute(id) ||
+                el.getAttribute('main-drawer') === id)) {
+              return el.toggle ? el.toggle() : el.toggleDrawer();
+            } else if (!el.hasAttribute('hidden')) {
+              return el.toggle ? el.toggle() : el.toggleDrawer();
+            }
+          }
+        }
+      }
+    });
+  </script>
+</dom-module>
